@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#8B0000" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>हनुमान चालीसा</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body {
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      font-family: 'Noto Sans Devanagari', 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #1a0500;
+      color: #fff;
+      position: relative;
+    }
+
+    .screen {
+      position: absolute;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      overflow: hidden;
+    }
+    .screen.active { display: flex; }
+
+    .bg-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 3, 0, 0.82);
+      z-index: 0;
+      pointer-events: none;
+    }
+    .content {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+      text-align: center;
+    }
+
+    /* ========== SPLASH ========== */
+    #splash {
+      background: #000;
+      justify-content: space-between;
+      padding: 16px 12px 10px;
+    }
+    #splash .img-wrap {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      max-height: 55%;
+      margin-top: 4%;
+    }
+    #splash img {
+      max-width: 82%;
+      max-height: 100%;
+      border-radius: 50%;
+      box-shadow: 0 0 50px rgba(255, 160, 40, 0.55);
+      object-fit: contain;
+    }
+    #splash h1 {
+      font-size: clamp(1.6rem, 6vw, 2.3rem);
+      color: #ffd700;
+      text-shadow: 0 0 18px #ff8c00, 0 2px 4px #000;
+      letter-spacing: 1px;
+      margin: 10px 0 6px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    #splash .credits {
+      width: 100%;
+      padding: 12px 10px 14px;
+      font-size: 0.82rem;
+      color: #f0e0c0;
+      text-align: center;
+      line-height: 1.4;
+      background: rgba(40, 15, 0, 0.7);
+      border-top: 1px solid rgba(255, 200, 80, 0.3);
+      margin-top: auto;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+    #splash .credits strong {
+      color: #ffd700;
+      font-size: 0.95rem;
+    }
+
+    /* Flower shower */
+    .flower {
+      position: absolute;
+      top: -50px;
+      font-size: 24px;
+      pointer-events: none;
+      z-index: 15;
+      animation: fall linear forwards;
+      opacity: 0.95;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+    @keyframes fall {
+      0%   { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
+      80%  { opacity: 0.85; }
+      100% { transform: translateY(115vh) rotate(720deg) scale(0.7); opacity: 0.2; }
+    }
+
+    /* ========== MENU ========== */
+    #menu img.main {
+      max-width: 90%;
+      max-height: 46vh;
+      border-radius: 14px;
+      box-shadow: 0 10px 35px rgba(0,0,0,0.55);
+      object-fit: contain;
+    }
+    #menu h1 {
+      margin: 12px 0 20px;
+      font-size: clamp(1.5rem, 5.5vw, 2rem);
+      color: #ffd700;
+      text-shadow: 0 0 12px #c40, 0 2px 3px #000;
+    }
+    .btn-row {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+      width: 100%;
+      padding: 0 10px;
+    }
+    .btn {
+      padding: 13px 24px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.45);
+      transition: transform 0.12s;
+      min-width: 140px;
+      justify-content: center;
+      color: #fff;
+    }
+    .btn:active { transform: scale(0.95); }
+    .btn-auto  { background: linear-gradient(135deg, #ff7a00, #e63900); }
+    .btn-manual{ background: linear-gradient(135deg, #2e8b2e, #145214); }
+    .btn-next, .btn-back {
+      background: linear-gradient(135deg, #c47a00, #8b4513);
+      color: #fff;
+      padding: 11px 22px;
+      font-size: 1.05rem;
+      border-radius: 40px;
+      border: none;
+      font-weight: 700;
+      min-width: 110px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+    }
+    .btn-next { background: linear-gradient(135deg, #ff8c00, #ff4500); }
+
+    /* ========== CHALISA VIEWER ========== */
+    #chalisa-viewer { justify-content: flex-start; padding-top: 6px; }
+    #chalisa-img {
+      max-width: 96%;
+      max-height: 70vh;
+      object-fit: contain;
+      border-radius: 10px;
+      box-shadow: 0 6px 22px rgba(0,0,0,0.5);
+      background: #fff8f0;
+    }
+    .nav-bar {
+      position: absolute;
+      bottom: 16px;
+      left: 0; right: 0;
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      z-index: 10;
+      padding: 0 12px;
+    }
+    .progress {
+      position: absolute;
+      top: 8px;
+      right: 12px;
+      background: rgba(0,0,0,0.6);
+      padding: 3px 11px;
+      border-radius: 16px;
+      font-size: 0.85rem;
+      color: #ffd700;
+      z-index: 5;
+    }
+
+    /* ========== GENERIC PAGES ========== */
+    .page-img {
+      max-width: 96%;
+      max-height: 76vh;
+      object-fit: contain;
+      border-radius: 10px;
+      box-shadow: 0 6px 22px rgba(0,0,0,0.5);
+      background: #faf5eb;
+    }
+
+    /* ========== CLOSING ========== */
+    #closing {
+      background: rgba(0,0,0,0.94);
+      z-index: 100;
+    }
+    #closing .box {
+      background: linear-gradient(165deg, #5a0a00, #1c0500);
+      border: 3px solid #ffd700;
+      border-radius: 18px;
+      padding: 28px 20px;
+      text-align: center;
+      max-width: 92%;
+      box-shadow: 0 0 45px rgba(255,180,0,0.25);
+    }
+    #closing h2 {
+      font-size: 2rem;
+      color: #ffd700;
+      margin-bottom: 10px;
+      text-shadow: 0 0 10px #ff8c00;
+    }
+    #closing p {
+      font-size: 1.1rem;
+      margin-bottom: 16px;
+      color: #ffe4b5;
+    }
+    #closing .credits {
+      font-size: 0.8rem;
+      color: #bbb;
+      margin-top: 16px;
+      line-height: 1.4;
+    }
+    #closing .credits strong { color: #ffd700; }
+
+    audio { position: absolute; width: 0; height: 0; opacity: 0; pointer-events: none; }
+  </style>
+</head>
+<body>
+
+  <!-- SPLASH -->
+  <div id="splash" class="screen active">
+    <div class="content" style="justify-content: flex-start; padding: 0;">
+      <div class="img-wrap">
+        <img src="assets/splash-hanuman.jpg" alt="हनुमान जी" />
+      </div>
+      <h1>हनुमान चालीसा</h1>
+      <div class="credits">
+        Designed and Developed by<br>
+        <strong>100, 000 000 000</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- MENU -->
+  <div id="menu" class="screen">
+    <div class="bg-overlay"></div>
+    <div class="content">
+      <img class="main" src="assets/menu-hanuman.png" alt="हनुमान जी" />
+      <h1>हनुमान चालीसा</h1>
+      <div class="btn-row">
+        <button class="btn btn-auto" id="btn-auto">🔊 स्वतः</button>
+        <button class="btn btn-manual" id="btn-manual">🙏 स्वयं</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHALISA VIEWER -->
+  <div id="chalisa-viewer" class="screen">
+    <div class="bg-overlay"></div>
+    <div class="content">
+      <div class="progress" id="progress">1 / 43</div>
+      <img id="chalisa-img" src="assets/chalisa/01.png" alt="चालीसा" />
+      <div class="nav-bar" id="nav-bar">
+        <button class="btn-back" id="btn-back">◀ पीछे</button>
+        <button class="btn-next" id="btn-next">आगे ▶</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LATER PAGES -->
+  <div id="page-yantra" class="screen">
+    <div class="bg-overlay"></div>
+    <div class="content">
+      <img class="page-img" src="assets/yantra.jpg" alt="तांत्रिक श्री हनुमद यंत्र" />
+      <div class="nav-bar"><button class="btn-next" data-goto="page-puja">आगे ▶</button></div>
+    </div>
+  </div>
+
+  <div id="page-puja" class="screen">
+    <div class="bg-overlay"></div>
+    <div class="content">
+      <img class="page-img" src="assets/puja-vidhi.png" alt="वैदिक और शास्त्रोक पूजन विधि" />
+      <div class="nav-bar"><button class="btn-next" data-goto="page-sankat1">आगे ▶</button></div>
+    </div>
+  </div>
+
+  <div id="page-sankat1" class="screen">
+    <div class="bg-overlay"></div>
+    <div class="content">
+      <img class="page-img" src="assets/sankat1.jpg" alt="संकट मोचक हनुमाष्टक" />
+      <div class="nav-bar"><button class="btn-next" data-goto="page-sankat2">आगे ▶</button></div>
+    </div>
+  </div>
+
+  <div id="page-sankat2" class="screen">
+    <div class="bg-overlay"></div>
+    <div class="content">
+      <img class="page-img" src="assets/sankat2.jpg" alt="संकट मोचक - 2" />
+      <div class="nav-bar"><button class="btn-next" data-goto="page-bw">आगे ▶</button></div>
+    </div>
+  </div>
+
+  <div id="page-bw" class="screen">
+    <div class="bg-overlay"></div>
+    <div class="content">
+      <img class="page-img" src="assets/hanuman-bw.jpg" alt="हनुमान जी" />
+      <div class="nav-bar"><button class="btn-next" data-goto="page-bajrang1">आगे ▶</button></div>
+    </div>
+  </div>
+
+  <div id="page-bajrang1" class="screen">
+    <div class="bg-overlay"></div>
+    <div class="content">
+      <img class="page-img" src="assets/bajrang1.jpg" alt="अथ बजरंग बाण" />
+      <div class="nav-bar"><button class="btn-next" data-goto="page-bajrang2">आगे ▶</button></div>
+    </div>
+  </div>
+
+  <div id="page-bajrang2" class="screen">
+    <div class="bg-overlay"></div>
+    <div class="content">
+      <img class="page-img" src="assets/bajrang2.jpg" alt="बजरंग बाण - 2" />
+      <div class="nav-bar"><button class="btn-next" data-goto="page-blue">आगे ▶</button></div>
+    </div>
+  </div>
+
+  <div id="page-blue" class="screen">
+    <div class="bg-overlay"></div>
+    <div class="content">
+      <img class="page-img" src="assets/hanuman-blue.jpg" alt="हनुमान जी" />
+      <div class="nav-bar"><button class="btn-next" data-goto="page-aarti">आगे ▶</button></div>
+    </div>
+  </div>
+
+  <div id="page-aarti" class="screen">
+    <div class="bg-overlay"></div>
+    <div class="content">
+      <img class="page-img" src="assets/aarti.png" alt="श्री हनुमान जी की आरती" />
+      <div class="nav-bar"><button class="btn-next" id="btn-finish">समाप्त ▶</button></div>
+    </div>
+  </div>
+
+  <!-- CLOSING -->
+  <div id="closing" class="screen">
+    <div class="box">
+      <h2>जय श्री राम</h2>
+      <p>🙏 इस ऐप का उपयोग करने के लिए धन्यवाद 🙏</p>
+      <div class="credits">
+        Designed and Developed by<br>
+        <strong>100, 000 000 000</strong>
+      </div>
+    </div>
+  </div>
+
+  <audio id="audio" preload="auto" playsinline>
+    <source src="assets/hanuman-chalisa.mp3" type="audio/mpeg">
+  </audio>
+
+  <script>
+    const TOTAL = 43;
+    const RAM_BG = "url('assets/ram-bg.jpg')";
+    const FLOWERS = ['🌻','🌼','🏵️','🪷','🌸','🌺','🌷','🌹','💮'];
+
+    document.querySelectorAll('.screen:not(#splash):not(#closing)').forEach(s => {
+      s.style.backgroundImage = RAM_BG;
+    });
+
+    let current = 1;
+    let isAuto = false;
+    let autoInterval = null;
+    const audio = document.getElementById('audio');
+
+    const times = Array.from({length: TOTAL}, (_, i) => Math.round(i * (628 / TOTAL)));
+    times[0] = 0;
+    times[1] = 12;
+    times[2] = 36;
+
+    function show(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      const el = document.getElementById(id);
+      if (el) el.classList.add('active');
+    }
+
+    function updateSlide() {
+      const n = String(current).padStart(2, '0');
+      document.getElementById('chalisa-img').src = 'assets/chalisa/' + n + '.png';
+      document.getElementById('progress').textContent = current + ' / ' + TOTAL;
+    }
+
+    // Flower shower on splash
+    function createFlower() {
+      const f = document.createElement('div');
+      f.className = 'flower';
+      f.textContent = FLOWERS[Math.floor(Math.random() * FLOWERS.length)];
+      f.style.left = (Math.random() * 96 + 2) + 'vw';
+      f.style.fontSize = (18 + Math.random() * 18) + 'px';
+      f.style.animationDuration = (3.2 + Math.random() * 4.5) + 's';
+      document.getElementById('splash').appendChild(f);
+      setTimeout(function(){ f.remove(); }, 9000);
+    }
+    function startFlowerShower() {
+      for (let i = 0; i < 14; i++) setTimeout(createFlower, i * 160);
+      const id = setInterval(createFlower, 280);
+      setTimeout(function(){ clearInterval(id); }, 5000);
+    }
+    startFlowerShower();
+
+    // Splash → Menu
+    setTimeout(function(){ show('menu'); }, 5000);
+
+    // Auto button
+    document.getElementById('btn-auto').addEventListener('click', function() {
+      isAuto = true;
+      current = 1;
+      updateSlide();
+      show('chalisa-viewer');
+      document.getElementById('btn-back').style.display = 'none';
+      document.getElementById('btn-next').style.display = 'none';
+
+      audio.currentTime = 0;
+      var playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(function(err) {
+          console.warn('Audio error', err);
+          alert('साउंड चालू करें और फिर से "स्वतः" दबाएँ');
+        });
+      }
+      startAutoSync();
+    });
+
+    // Manual button
+    document.getElementById('btn-manual').addEventListener('click', function() {
+      isAuto = false;
+      current = 1;
+      updateSlide();
+      show('chalisa-viewer');
+      document.getElementById('btn-back').style.display = 'inline-flex';
+      document.getElementById('btn-next').style.display = 'inline-flex';
+      audio.pause();
+      audio.currentTime = 0;
+      clearInterval(autoInterval);
+    });
+
+    document.getElementById('btn-back').addEventListener('click', function() {
+      if (current > 1) { current--; updateSlide(); }
+    });
+
+    document.getElementById('btn-next').addEventListener('click', function() {
+      if (current < TOTAL) {
+        current++;
+        updateSlide();
+      } else {
+        clearInterval(autoInterval);
+        audio.pause();
+        show('page-yantra');
+      }
+    });
+
+    document.querySelectorAll('[data-goto]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        show(btn.getAttribute('data-goto'));
+      });
+    });
+
+    document.getElementById('btn-finish').addEventListener('click', function() {
+      show('closing');
+    });
+
+    function startAutoSync() {
+      clearInterval(autoInterval);
+      autoInterval = setInterval(function() {
+        if (!isAuto) return;
+        var t = audio.currentTime;
+        var target = 1;
+        for (var i = times.length - 1; i >= 0; i--) {
+          if (t >= times[i]) { target = i + 1; break; }
+        }
+        if (target !== current && target <= TOTAL) {
+          current = target;
+          updateSlide();
+        }
+        if (audio.ended || t >= 620) {
+          clearInterval(autoInterval);
+          var nextBtn = document.getElementById('btn-next');
+          nextBtn.style.display = 'inline-flex';
+          nextBtn.textContent = 'आगे ▶';
+          nextBtn.onclick = function() {
+            audio.pause();
+            show('page-yantra');
+          };
+        }
+      }, 500);
+    }
+
+    audio.load();
+  </script>
+</body>
+</html>
